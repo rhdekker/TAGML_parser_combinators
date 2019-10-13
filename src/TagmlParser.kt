@@ -7,7 +7,14 @@ fun main(args: Array<String>) {
 // The example for a `Parser<Char, List<String>>`
     val foo: Parser<Char, List<Char>> = not(char(',')).rep
     val input = Reader.string("hello, parsec!")
-    val result = foo(input)
+
+
+    val tagml = Reader.string("[tagml>")
+    val tagmlParser: Parser<Char, String> = string("[tagml>")
+            //.(char('t'))
+    val result = tagmlParser(tagml)
+
+    println(result)
 
     when (result) {
         is Accept -> println("good")

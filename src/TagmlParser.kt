@@ -3,6 +3,14 @@ import lambdada.parsec.parser.Response.* // for reading the parser result (Accep
 import lambdada.parsec.io.Reader // for running parsers (Reader)
 
 
+/* trying to build a TAGML parser using parser combinators in Kotlin
+  13-10-2019
+
+  Ronald Haentjens Dekker
+ */
+
+data class MCTNode(val name: String)
+
 fun main(args: Array<String>) {
 // The example for a `Parser<Char, List<String>>`
     val foo: Parser<Char, List<Char>> = not(char(',')).rep
@@ -10,7 +18,7 @@ fun main(args: Array<String>) {
 
 
     val tagml = Reader.string("[tagml>")
-    val tagmlParser: Parser<Char, String> = string("[tagml>")
+    val tagmlParser: Parser<Char, MCTNode> = string("[tagml>").map { f -> MCTNode("tagml") }
             //.(char('t'))
     val result = tagmlParser(tagml)
 

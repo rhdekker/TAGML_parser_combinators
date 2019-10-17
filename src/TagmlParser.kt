@@ -28,8 +28,8 @@ fun main(args: Array<String>) {
     val result = tagmlParser(tagml)
     println(result)
 
-    val identifierTest = Reader.string("test>")
-    val identifier: Parser<Char, List<Char>> = charIn(CharRange('a', 'Z')).rep
+    val identifierTest = Reader.string("t")
+    val identifier: Parser<Char, List<Char>> = charIn(CharRange('A', 'z')).rep
     val result2 = identifier(identifierTest)
     println(result2)
 

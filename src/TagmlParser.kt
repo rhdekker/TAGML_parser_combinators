@@ -10,8 +10,24 @@ import lambdada.parsec.io.Reader // for running parsers (Reader)
  */
 
 data class MCTNode(val name: String)
+data class OpenMCTNode(val name: String, val open: Boolean = true)
 
-fun main(args: Array<String>) {
+fun main() {
+    // We want to return the root node, which has a child node
+    val moreComplexTAGML = Reader.string("[root>[child><child]<root]")
+    val opentagParser: Parser<Char, OpenMCTNode> = char('[').thenRight(charIn(CharRange('A', 'z')).rep).thenLeft(char('>')).map { OpenMCTNode (String(it.toCharArray())) }
+    val myparser: Parser<Char, Pair<OpenMCTNode, OpenMCTNode>> = opentagParser.then(opentagParser)
+    val result = myparser(moreComplexTAGML)
+
+    println(result)
+
+
+
+
+}
+
+
+fun test() {
     val foo: Parser<Char, List<Char>> = not(char(',')).rep
     val input = Reader.string("hello, parsec!")
     val foobar = foo(input)
@@ -32,7 +48,6 @@ fun main(args: Array<String>) {
     val identifier: Parser<Char, List<Char>> = (charIn(CharRange('0', 'z'))).rep
     val result2 = identifier(identifierTest)
     println(result2)
-
 
 
 }

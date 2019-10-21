@@ -11,18 +11,29 @@ import lambdada.parsec.io.Reader // for running parsers (Reader)
 
 data class MCTNode(val name: String)
 data class OpenMCTNode(val name: String, val open: Boolean = true)
+data class ClosedMCTNode(val name: String, val open: Boolean = false)
 
 fun main() {
+    // basic TAGML parsers
+    val opentagParser: Parser<Char, OpenMCTNode> = char('[').thenRight(charIn(CharRange('A', 'z')).rep).thenLeft(char('>')).map { OpenMCTNode (String(it.toCharArray())) }
+    val closeTagParser: Parser<Char, ClosedMCTNode> = char('<').thenRight(charIn(CharRange('A', 'z')).rep).map { ClosedMCTNode(String(it.toCharArray()))}
+
+        //.thenLeft(char(']'))
+
+    // close tag test
+    val testCloseTag = Reader.string("<child]")
+    val mytestparser: Parser<Char, ClosedMCTNode> = closeTagParser
+    val resultt = mytestparser(testCloseTag)
+    println(resultt)
+
     // We want to return the root node, which has a child node
     val moreComplexTAGML = Reader.string("[root>[child><child]<root]")
-    val opentagParser: Parser<Char, OpenMCTNode> = char('[').thenRight(charIn(CharRange('A', 'z')).rep).thenLeft(char('>')).map { OpenMCTNode (String(it.toCharArray())) }
-    val myparser: Parser<Char, Pair<OpenMCTNode, OpenMCTNode>> = opentagParser.then(opentagParser)
+    val myparser: Parser<Char, Pair<Pair<OpenMCTNode, OpenMCTNode>, ClosedMCTNode>> = opentagParser.then(opentagParser).then(closeTagParser)
     val result = myparser(moreComplexTAGML)
 
     println(result)
 
-
-
+    // once we get a close tag we need to reduce a
 
 }
 

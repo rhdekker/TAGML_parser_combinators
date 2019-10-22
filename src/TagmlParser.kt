@@ -23,12 +23,50 @@ fun main() {
 
     // We want to return the root node, which has a child node
     val moreComplexTAGML = Reader.string("[root>[child><child]<root]")
-    val myparser: Parser<Char, Pair<Pair<Pair<OpenMCTNode, OpenMCTNode>, ClosedMCTNode>, ClosedMCTNode>> = opentagParser.then(opentagParser).then(closeTagParser).then(closeTagParser)
-    val result = myparser(moreComplexTAGML)
 
-    println(result)
+
+
+
+//    val myparser: Parser<Char, Pair<Pair<Pair<OpenMCTNode, OpenMCTNode>, ClosedMCTNode>, ClosedMCTNode>> = opentagParser.then(opentagParser).then(closeTagParser).then(closeTagParser)
+
 
     // once we get a close tag we need to reduce a
+
+
+    // the way we does this is we first look for an open tag!
+    // Then we look for a close tag...
+    // When we encounter a close tag we go over the list of things we have seen thus far.
+
+    // how do I create a new parser where I can state myself whether it is a success or failure?
+    val tagmlParser: Parser<Char, MCTNode> =
+        {
+            println(it)
+            val temp_list_of_open_tags =  (opentagParser.rep)(it)
+            println(temp_list_of_open_tags)
+            //temp_list_of_open_tags.fold()
+            if (temp_list_of_open_tags is Accept) {
+                // look for a close tag using the same reader as the pevious parser (.input)
+                val close_tag = closeTagParser(temp_list_of_open_tags.input)
+                println(close_tag)
+                // check whether the close tag is in the open tags...
+                // if not throw an error (reject)
+                // if yes... remove from open tags
+                // so being functional means that we do not change the state of the input variables
+                // we return continuitously a new object
+                val list_open_of_nodes = temp_list_of_open_tags.value
+                if (close_tag is Accept) {
+                    val close_tag_node = close_tag.value
+                    println(list_open_of_nodes)
+                    println(close_tag_node)
+                }
+            }
+            //want to do something like: returns (MCTNode("bla"))
+            //TODO: This response is hard coded, and needs to change
+            Reject(it.location(), false)
+        }
+
+    val result = tagmlParser(moreComplexTAGML)
+    println(result)
 
 }
 

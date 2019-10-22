@@ -9,7 +9,8 @@ import lambdada.parsec.io.Reader // for running parsers (Reader)
   Ronald Haentjens Dekker
  */
 
-data class MCTNode(val name: String)
+//TODO: rename!
+data class MCTNode(val name: String, val listOfOpenNodes: List<OpenMCTNode>, val listOfClosedNodes: List<ClosedMCTNode>)
 data class OpenMCTNode(val name: String, val open: Boolean = true)
 data class ClosedMCTNode(val name: String, val open: Boolean = false)
 
@@ -38,36 +39,50 @@ fun main() {
     // When we encounter a close tag we go over the list of things we have seen thus far.
 
     // how do I create a new parser where I can state myself whether it is a success or failure?
-    val tagmlParser: Parser<Char, MCTNode> =
-        {
-            println(it)
-            val temp_list_of_open_tags =  (opentagParser.rep)(it)
-            println(temp_list_of_open_tags)
-            //temp_list_of_open_tags.fold()
-            if (temp_list_of_open_tags is Accept) {
-                // look for a close tag using the same reader as the pevious parser (.input)
-                val close_tag = closeTagParser(temp_list_of_open_tags.input)
-                println(close_tag)
-                // check whether the close tag is in the open tags...
-                // if not throw an error (reject)
-                // if yes... remove from open tags
-                // so being functional means that we do not change the state of the input variables
-                // we return continuitously a new object
-                val list_open_of_nodes = temp_list_of_open_tags.value
-                if (close_tag is Accept) {
-                    val close_tag_node = close_tag.value
-                    println(list_open_of_nodes)
-                    println(close_tag_node)
-                }
-            }
-            //want to do something like: returns (MCTNode("bla"))
-            //TODO: This response is hard coded, and needs to change
-            Reject(it.location(), false)
+
+    val response: Response<Char, MCTNode> = parseTAGML(moreComplexTAGML)
+    println(response)
+}
+
+fun parseTAGML(reader: Reader<Char>): Response<Char, MCTNode> {
+    println(reader)
+    val temp_list_of_open_tags =  (opentagParser.rep)(reader)
+    println(temp_list_of_open_tags)
+    //temp_list_of_open_tags.fold()
+    if (temp_list_of_open_tags is Accept) {
+        // look for a close tag using the same reader as the previous parser (.input)
+        val close_tag = closeTagParser(temp_list_of_open_tags.input)
+        println(close_tag)
+        // check whether the close tag is in the open tags...
+        // if not throw an error (reject)
+        // if yes... remove from open tags
+        // so being functional means that we do not change the state of the input variables
+        // we return continuously a new object
+        val list_open_of_nodes = temp_list_of_open_tags.value
+        if (close_tag is Accept) {
+            val close_tag_node = close_tag.value
+            println(list_open_of_nodes)
+            println(close_tag_node)
+            // we look for the name of the close tag in the open tags...
+            // if it is not there it is an error...
+            // otherwise we create an MCTNode object (maybe this should become MCT graph?)
+            val openMCTNode: OpenMCTNode = list_open_of_nodes.last { node -> node.name == close_tag_node.name }
+            // we must create a new MCTNode object
+            // the one thing about this I don't like is that we will create lots of objects all the time
+            // should this list be a copy? No, because it can't be changed; garbage collectionn is going to have a field day.
+            val listOfClosedNodes = listOf(close_tag_node)
+            //TODO: still a node too many in open
+            println("here!")
+            //returns<Char, MCTNode>()
+            return Accept<Char, MCTNode>(
+                MCTNode("blabla", list_open_of_nodes, listOfClosedNodes),
+                close_tag.input,
+                true
+            )
         }
-
-    val result = tagmlParser(moreComplexTAGML)
-    println(result)
-
+    }
+    //TODO: This response is hard coded, and needs to change
+    return Reject(reader.location(), false)
 }
 
 
@@ -84,7 +99,7 @@ fun test() {
     // good
 
     val tagml = Reader.string("[tagml>")
-    val tagmlParser: Parser<Char, MCTNode> = string("[tagml>").map { MCTNode("tagml") }
+    val tagmlParser: Parser<Char, MCTNode> = string("[tagml>").map { MCTNode("tagml", emptyList(), emptyList()) }
     val result = tagmlParser(tagml)
     println(result)
 

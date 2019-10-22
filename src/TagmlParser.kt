@@ -7,6 +7,10 @@ import lambdada.parsec.io.Reader // for running parsers (Reader)
   13-10-2019
 
   Ronald Haentjens Dekker
+
+  Some notes:
+  parseTAGML function is at the moment not an anonymous function, like all the other parsec.kotlin examples are.
+
  */
 
 //TODO: rename!
@@ -20,26 +24,14 @@ val opentagParser: Parser<Char, OpenMCTNode> = char('[').thenRight(charIn(CharRa
 val closeTagParser: Parser<Char, ClosedMCTNode> = char('<').thenRight(charIn(CharRange('a', 'z')).rep).thenLeft(char(']')).map { ClosedMCTNode(String(it.toCharArray())) }
 
 fun main() {
-
-
     // We want to return the root node, which has a child node
     val moreComplexTAGML = Reader.string("[root>[child><child]<root]")
-
-
-
-
-//    val myparser: Parser<Char, Pair<Pair<Pair<OpenMCTNode, OpenMCTNode>, ClosedMCTNode>, ClosedMCTNode>> = opentagParser.then(opentagParser).then(closeTagParser).then(closeTagParser)
-
-
+    //    val myparser: Parser<Char, Pair<Pair<Pair<OpenMCTNode, OpenMCTNode>, ClosedMCTNode>, ClosedMCTNode>> = opentagParser.then(opentagParser).then(closeTagParser).then(closeTagParser)
     // once we get a close tag we need to reduce a
-
-
     // the way we does this is we first look for an open tag!
     // Then we look for a close tag...
     // When we encounter a close tag we go over the list of things we have seen thus far.
-
     // how do I create a new parser where I can state myself whether it is a success or failure?
-
     val response: Response<Char, MCTNode> = parseTAGML(moreComplexTAGML)
     println(response)
 }
@@ -58,24 +50,24 @@ fun parseTAGML(reader: Reader<Char>): Response<Char, MCTNode> {
         // if yes... remove from open tags
         // so being functional means that we do not change the state of the input variables
         // we return continuously a new object
-        val list_open_of_nodes = temp_list_of_open_tags.value
         if (close_tag is Accept) {
             val close_tag_node = close_tag.value
-            println(list_open_of_nodes)
             println(close_tag_node)
             // we look for the name of the close tag in the open tags...
             // if it is not there it is an error...
             // otherwise we create an MCTNode object (maybe this should become MCT graph?)
-            val openMCTNode: OpenMCTNode = list_open_of_nodes.last { node -> node.name == close_tag_node.name }
+            // Instead of looking in the list for the close tag node name and then removing it...
+            // We could also keep everything that does not have that name
+            // Note that does not work in cases were a tag name is repeated.
             // we must create a new MCTNode object
             // the one thing about this I don't like is that we will create lots of objects all the time
-            // should this list be a copy? No, because it can't be changed; garbage collectionn is going to have a field day.
+            // should this list be a copy? No, because it can't be changed; garbage collection is going to have a field day.
+            val previous_list_open_of_nodes = temp_list_of_open_tags.value
+            println(previous_list_open_of_nodes)
+            val list_of_open_nodes = previous_list_open_of_nodes.filter { node -> node.name != close_tag_node.name }
             val listOfClosedNodes = listOf(close_tag_node)
-            //TODO: still a node too many in open
-            println("here!")
-            //returns<Char, MCTNode>()
             return Accept<Char, MCTNode>(
-                MCTNode("blabla", list_open_of_nodes, listOfClosedNodes),
+                MCTNode("blabla", list_of_open_nodes, listOfClosedNodes),
                 close_tag.input,
                 true
             )

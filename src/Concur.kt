@@ -1,8 +1,5 @@
 import lambdada.parsec.io.Reader
-import lambdada.parsec.parser.Parser
-import lambdada.parsec.parser.Response
-import lambdada.parsec.parser.char
-import lambdada.parsec.parser.returns
+import lambdada.parsec.parser.*
 
 /*
  * Attempt to build a concur operator
@@ -17,14 +14,14 @@ fun concur(
     char1: Parser<Char, Char>,
     char2: Parser<Char, Char>,
     char3: Parser<Char, Char>
-): Parser<Char, Boolean> {
-    // temp
-    return Unit as Parser<Char, Boolean>
+): Parser<Char, List<Char>> {
+    return { processConcur(char, char1, char2, char3, it) }
 }
 
-//fun <I, A> processConcur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p4: Parser<I, A>, reader: Reader<I>): Response<I, A> {
-//    Acce
-//}
+// TODO: incomplete implementation
+fun <I, A> processConcur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p4: Parser<I, A>, reader: Reader<I>): Response<I, List<A>> {
+    return Response.Accept(listOf((p1.thenRight(p2)(reader) as Response.Accept).value), reader, true)
+}
 
 fun main() {
     // we want to test the concur operator
@@ -32,7 +29,7 @@ fun main() {
     val input = Reader.string("abcd")
 
     // Example specific parser
-    val par: Parser<Char, Boolean> = concur(char('a'), char('b'), char('c'), char('d'))
+    val par: Parser<Char, List<Char>> = concur(char('a'), char('b'), char('c'), char('d'))
 
     // run the parser on the input
     val result = par(input)

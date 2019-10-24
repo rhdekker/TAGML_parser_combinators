@@ -1,3 +1,5 @@
+package tag.`parser-combinators`
+
 import lambdada.parsec.parser.* // combinators, e.g. string, char, not, ...
 import lambdada.parsec.parser.Response.* // for reading the parser result (Accept, Reject)
 import lambdada.parsec.io.Reader // for running parsers (Reader)
@@ -9,7 +11,7 @@ import lambdada.parsec.io.Reader // for running parsers (Reader)
   Ronald Haentjens Dekker
 
   Some notes:
-  parseTAGML function is at the moment not an anonymous function, like all the other parsec.kotlin examples are.
+  TAGML_parser_combinators.parseTAGML function is at the moment not an anonymous function, like all the other parsec.kotlin examples are.
 
  */
 
@@ -20,19 +22,24 @@ data class ClosedMCTNode(val name: String, val open: Boolean = false)
 
 // basic TAGML parsers
 // NOTE: CharRange A - z INCLUDES [ and ] !!!!!
-val opentagParser: Parser<Char, OpenMCTNode> = char('[').thenRight(charIn(CharRange('a', 'z')).rep).thenLeft(char('>')).map { OpenMCTNode (String(it.toCharArray())) }
-val closeTagParser: Parser<Char, ClosedMCTNode> = char('<').thenRight(charIn(CharRange('a', 'z')).rep).thenLeft(char(']')).map { ClosedMCTNode(String(it.toCharArray())) }
+val opentagParser: Parser<Char, OpenMCTNode> = char('[').thenRight(charIn(CharRange('a', 'z')).rep).thenLeft(char('>')).map {
+    OpenMCTNode(String(it.toCharArray()))
+}
+val closeTagParser: Parser<Char, ClosedMCTNode> = char('<').thenRight(charIn(CharRange('a', 'z')).rep).thenLeft(char(']')).map {
+    ClosedMCTNode(String(it.toCharArray()))
+}
 
 fun main() {
     // We want to return the root node, which has a child node
     val moreComplexTAGML = Reader.string("[root>[child><child]<root]")
-    //    val myparser: Parser<Char, Pair<Pair<Pair<OpenMCTNode, OpenMCTNode>, ClosedMCTNode>, ClosedMCTNode>> = opentagParser.then(opentagParser).then(closeTagParser).then(closeTagParser)
+    //    val myparser: Parser<Char, Pair<Pair<Pair<TAGML_parser_combinators.OpenMCTNode, TAGML_parser_combinators.OpenMCTNode>, TAGML_parser_combinators.ClosedMCTNode>, TAGML_parser_combinators.ClosedMCTNode>> = TAGML_parser_combinators.getOpentagParser.then(TAGML_parser_combinators.getOpentagParser).then(TAGML_parser_combinators.getCloseTagParser).then(TAGML_parser_combinators.getCloseTagParser)
     // once we get a close tag we need to reduce a
     // the way we does this is we first look for an open tag!
     // Then we look for a close tag...
     // When we encounter a close tag we go over the list of things we have seen thus far.
     // how do I create a new parser where I can state myself whether it is a success or failure?
-    val response: Response<Char, MCTNode> = parseTAGML(moreComplexTAGML)
+    val response: Response<Char, MCTNode> =
+        parseTAGML(moreComplexTAGML)
     println(response)
 }
 
@@ -55,11 +62,11 @@ fun parseTAGML(reader: Reader<Char>): Response<Char, MCTNode> {
             println(close_tag_node)
             // we look for the name of the close tag in the open tags...
             // if it is not there it is an error...
-            // otherwise we create an MCTNode object (maybe this should become MCT graph?)
+            // otherwise we create an TAGML_parser_combinators.MCTNode object (maybe this should become MCT graph?)
             // Instead of looking in the list for the close tag node name and then removing it...
             // We could also keep everything that does not have that name
             // Note that does not work in cases were a tag name is repeated.
-            // we must create a new MCTNode object
+            // we must create a new TAGML_parser_combinators.MCTNode object
             // the one thing about this I don't like is that we will create lots of objects all the time
             // should this list be a copy? No, because it can't be changed; garbage collection is going to have a field day.
             val previous_list_open_of_nodes = temp_list_of_open_tags.value
@@ -91,7 +98,13 @@ fun test() {
     // good
 
     val tagml = Reader.string("[tagml>")
-    val tagmlParser: Parser<Char, MCTNode> = string("[tagml>").map { MCTNode("tagml", emptyList(), emptyList()) }
+    val tagmlParser: Parser<Char, MCTNode> = string("[tagml>").map {
+        MCTNode(
+            "tagml",
+            emptyList(),
+            emptyList()
+        )
+    }
     val result = tagmlParser(tagml)
     println(result)
 

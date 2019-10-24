@@ -1,8 +1,10 @@
+package tag.`parser-combinators`
+
 import lambdada.parsec.io.Reader
 import lambdada.parsec.parser.*
 
 /*
- * Attempt to build a concur operator
+ * Attempt to build a TAGML_parser_combinators.concur operator
  * 24-10-2019
  * Ronald Haentjens Dekker
  */
@@ -34,7 +36,7 @@ tailrec fun <I, A> processConcurRecursive(parsers: List<Parser<I, A>>, results: 
 }
 
 fun main() {
-    // we want to test the concur operator
+    // we want to test the TAGML_parser_combinators.concur operator
     // input string
     val input = Reader.string("abcd")
 

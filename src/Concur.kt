@@ -11,7 +11,7 @@ import lambdada.parsec.parser.*
 // Should call recursive function.
 // was: processConcur(p1, p2, p3, p4, it)
 fun <I, A> concur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p4: Parser<I, A>):
-        Parser<I, List<A>> = { processConcur2(listOf(p1, p2, p3, p4), it) }
+        Parser<I, List<A>> = { processConcur2(listOf(p1, p2, p3, p4), listOf(), it) }
 
 // TODO: incomplete implementation
 fun <I, A> processConcur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p4: Parser<I, A>, reader: Reader<I>): Response<I, List<A>> {
@@ -21,7 +21,7 @@ fun <I, A> processConcur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p
 }
 
 // TODO: trying to make it work with a list
-fun <I, A> processConcur2(parsers: List<Parser<I, A>>, reader: Reader<I>): Response<I, List<A>> {
+tailrec fun <I, A> processConcur2(parsers: List<Parser<I, A>>, results: List<A>, reader: Reader<I>): Response<I, List<A>> {
     // we go over all the parsers looking for an Accept.
     // we map all the parsers to a (parser, response) pair
     // then we filter to the first accept
@@ -29,14 +29,19 @@ fun <I, A> processConcur2(parsers: List<Parser<I, A>>, reader: Reader<I>): Respo
         parsers.map { parser -> Pair(parser, parser(reader)) }.find { pair -> pair.second is Response.Accept }
 
     println(firstParserResponsePair)
-    val response = firstParserResponsePair?.second as Response.Accept<I, A>
 
-    // if no parser reject
-    // if a parser and after filter list not empty recurse
-    // if a parser and no parsers accept
+    // if no parser was found -> reject
+    val response = firstParserResponsePair?.second as Response.Accept<I, A>?
+        ?: return Response.Reject(reader.location(), false)
 
-    // NOTE: PLACE holder
-    return Response.Accept(listOf(response.value), response.input, true)
+    // if a parser was found and no more parsers are to do -> accept
+    // if a parser was found and after filtering list of parsers not empty -> recurse
+    val parsersToDo = parsers.filter { parser -> parser != firstParserResponsePair?.first }
+
+    return when (parsersToDo.isEmpty()) {
+        true -> Response.Accept(results + response.value, response.input, true)
+        false -> processConcur2(parsersToDo, results + response.value, response.input)
+    }
 }
 
 fun main() {

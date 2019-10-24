@@ -9,8 +9,8 @@ import lambdada.parsec.parser.*
 
 // Function to build parsers with.
 // Should call recursive function.
-fun concur(char: Parser<Char, Char>, char1: Parser<Char, Char>, char2: Parser<Char, Char>, char3: Parser<Char, Char>):
-        Parser<Char, List<Char>> = { processConcur(char, char1, char2, char3, it) }
+fun <I, A> concur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p4: Parser<I, A>):
+        Parser<I, List<A>> = { processConcur(p1, p2, p3, p4, it) }
 
 // TODO: incomplete implementation
 fun <I, A> processConcur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p4: Parser<I, A>, reader: Reader<I>): Response<I, List<A>> {

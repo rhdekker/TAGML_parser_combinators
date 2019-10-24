@@ -29,13 +29,16 @@ fun main() {
     // we want to test the concur operator
     // input string
     val input = Reader.string("abcd")
+    val input2 = Reader.string("dcba")
 
     // Example specific parser
     val par: Parser<Char, List<Char>> = concur(char('a'), char('b'), char('c'), char('d'))
 
     // run the parser on the input
     val result = par(input)
-
-    // print the result
     println(result)
+
+    val result2 = par(input2)
+    println(result2)
+
 }

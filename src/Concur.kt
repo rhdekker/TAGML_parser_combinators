@@ -24,6 +24,10 @@ fun <I, A> processConcur2(parsers: List<Parser<I, A>>, reader: Reader<I>): Respo
     val firstParser = parsers.first()
     val remainder = parsers.subList(1, parsers.size)
     val result = firstParser(reader)
+    // if the result is positive we want to add the result to the list.
+    val responses : MutableList<A> = mutableListOf()
+    if (result is Response.Accept) responses.add(result.value)
+    // if the result is a Reject or the remainder is empty we need to stop
     val check = result is Response.Accept && !remainder.isEmpty()
     return Unit as Response<I, List<A>>
 }

@@ -20,8 +20,9 @@ fun concur(
 
 // TODO: incomplete implementation
 fun <I, A> processConcur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p4: Parser<I, A>, reader: Reader<I>): Response<I, List<A>> {
-    val pa = ((p1.then(p2))(reader) as Response.Accept).value
-    return Response.Accept(listOf(pa.first, pa.second), reader, true)
+    val pa = ((p1.then(p2))(reader) as Response.Accept)
+    val pa2 = ((p3.then(p4))(pa.input) as Response.Accept).value
+    return Response.Accept(listOf(pa.value.first, pa.value.second, pa2.first, pa2.second), reader, true)
 }
 
 fun main() {

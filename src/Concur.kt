@@ -22,11 +22,10 @@ fun <I, A> concur(p1: Parser<I, A>, p2: Parser<I, A>, p3: Parser<I, A>, p4: Pars
 tailrec fun <I, A> processConcurRecursive(parsers: List<Parser<I, A>>, results: List<A>, reader: Reader<I>): Response<I, List<A>> {
     val firstParserResponsePair =
         parsers.map { parser -> Pair(parser, parser(reader)) }.find { pair -> pair.second is Response.Accept }
+            ?: return Response.Reject(reader.location(), false)
 
-    val response = firstParserResponsePair?.second as Response.Accept<I, A>?
-        ?: return Response.Reject(reader.location(), false)
-
-    val parsersToDo = parsers.filter { parser -> parser != firstParserResponsePair?.first }
+    val response = firstParserResponsePair.second as Response.Accept<I, A>
+    val parsersToDo = parsers.filter { parser -> parser != firstParserResponsePair.first }
 
     return when (parsersToDo.isEmpty()) {
         true -> Response.Accept(results + response.value, response.input, true)

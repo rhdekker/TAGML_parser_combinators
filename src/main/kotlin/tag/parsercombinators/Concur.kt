@@ -1,7 +1,9 @@
-package tag.`parser-combinators`
+package main.kotlin.tag.parsercombinators
 
 import lambdada.parsec.io.Reader
-import lambdada.parsec.parser.*
+import lambdada.parsec.parser.Parser
+import lambdada.parsec.parser.Response
+import lambdada.parsec.parser.char
 
 /*
  * Attempt to build a TAGML_parser_combinators.concur operator

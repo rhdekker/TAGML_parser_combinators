@@ -1,8 +1,9 @@
-package tag.`parser-combinators`
+package tag.parsercombinators
 
-import lambdada.parsec.parser.* // combinators, e.g. string, char, not, ...
-import lambdada.parsec.parser.Response.* // for reading the parser result (Accept, Reject)
-import lambdada.parsec.io.Reader // for running parsers (Reader)
+import lambdada.parsec.io.Reader
+import lambdada.parsec.parser.*
+import lambdada.parsec.parser.Response.Accept
+import lambdada.parsec.parser.Response.Reject
 
 
 /* trying to build a TAGML parser using parser combinators in Kotlin
@@ -73,7 +74,7 @@ fun parseTAGML(reader: Reader<Char>): Response<Char, MCTNode> {
             println(previous_list_open_of_nodes)
             val list_of_open_nodes = previous_list_open_of_nodes.filter { node -> node.name != close_tag_node.name }
             val listOfClosedNodes = listOf(close_tag_node)
-            return Accept<Char, MCTNode>(
+            return Accept(
                 MCTNode("blabla", list_of_open_nodes, listOfClosedNodes),
                 close_tag.input,
                 true

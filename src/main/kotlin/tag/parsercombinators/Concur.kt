@@ -1,4 +1,4 @@
-package main.kotlin.tag.parsercombinators
+package tag.parsercombinators
 
 import lambdada.parsec.io.Reader
 import lambdada.parsec.parser.Parser

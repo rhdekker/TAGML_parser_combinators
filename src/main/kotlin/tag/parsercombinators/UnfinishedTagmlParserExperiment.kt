@@ -86,17 +86,6 @@ import lambdada.parsec.parser.Response.Reject
 //}
 //
 //
-//fun test() {
-//    val foo: Parser<Char, List<Char>> = not(char(',')).rep
-//    val input = Reader.string("hello, parsec!")
-//    val foobar = foo(input)
-//    println(foobar)
-//
-//    when (foobar) {
-//        is Accept -> println("good")
-//        is Reject -> println("bad")
-//    }
-//    // good
 //
 //    val tagml = Reader.string("[tagml>")
 //    val tagmlParser: Parser<Char, MCTNode> = string("[tagml>").map {

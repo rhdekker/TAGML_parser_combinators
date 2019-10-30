@@ -5,26 +5,28 @@ import lambdada.parsec.parser.*
 
 /*
  * Attempt to create a context sensitive TAGML parser.
+ * We need the basic open and close tags
+ * Note that these are in package scope
  */
-// We need the basic open and close tags
-// Note that these are in package scope
 val openTagParser: Parser<Char, String> = char('[') thenRight charIn(CharRange('a', 'z')).rep thenLeft char('>') map {
     String(it.toCharArray())
 }
-val anyCloseTagParser: Parser<Char, String> = char('<') thenRight charIn(CharRange('a', 'z')).rep thenLeft char(']') map {
-    String(it.toCharArray())
-}
+
 fun expectedCloseTagParser(expected: String): Parser<Char, String> = char('<') thenRight string(expected) thenLeft char(']')
 
-val openAndCloseTagParser: Parser<Char, Pair<String, String>> = openTagParser then anyCloseTagParser
-
 val anyOpenTagFollowedByTheExactSameCloseTagParser: Parser<Char, String> = {
-    val result = openTagParser(it)
-    when (result) {
+    when (val result = openTagParser(it)) {
         is Response.Accept -> expectedCloseTagParser(result.value)(result.input)
         is Response.Reject -> result
     }
 }
+
+// legacy parsers
+val anyCloseTagParser: Parser<Char, String> = char('<') thenRight charIn(CharRange('a', 'z')).rep thenLeft char(']') map {
+    String(it.toCharArray())
+}
+
+val openAndCloseTagParser: Parser<Char, Pair<String, String>> = openTagParser then anyCloseTagParser
 
 fun main() {
     val a = Reader.string("[root><root]")

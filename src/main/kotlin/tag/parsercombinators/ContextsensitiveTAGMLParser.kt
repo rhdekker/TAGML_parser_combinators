@@ -11,16 +11,26 @@ import lambdada.parsec.parser.*
 val openTagParser: Parser<Char, String> = char('[') thenRight charIn(CharRange('a', 'z')).rep thenLeft char('>') map {
     String(it.toCharArray())
 }
-val anyCloseTagParser: Parser<Char, String> = char('<').thenRight(charIn(CharRange('a', 'z')).rep).thenLeft(char(']')).map {
+val anyCloseTagParser: Parser<Char, String> = char('<') thenRight charIn(CharRange('a', 'z')).rep thenLeft char(']') map {
     String(it.toCharArray())
 }
 fun expectedCloseTagParser(expected: String): Parser<Char, String> = char('<') thenRight string(expected) thenLeft char(']')
 
 val openAndCloseTagParser: Parser<Char, Pair<String, String>> = openTagParser then anyCloseTagParser
 
+val anyOpenTagFollowedByTheExactSameCloseTagParser: Parser<Char, String> = {
+    val result = openTagParser(it)
+    //NOTE: nicer to use when instead of cast
+    val expectedString = (result as Response.Accept).value
+    val readerFromResponse = result.input
+    expectedCloseTagParser(expectedString)(readerFromResponse)
+}
 
 fun main() {
     val a = Reader.string("[root><root]")
-    val r = openAndCloseTagParser(a)
+    val r = anyOpenTagFollowedByTheExactSameCloseTagParser(a)
     println(r)
+    val b = Reader.string("[root><wrong]")
+    val s = anyOpenTagFollowedByTheExactSameCloseTagParser(b)
+    println(s)
 }

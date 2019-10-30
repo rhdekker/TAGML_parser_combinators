@@ -20,10 +20,10 @@ val openAndCloseTagParser: Parser<Char, Pair<String, String>> = openTagParser th
 
 val anyOpenTagFollowedByTheExactSameCloseTagParser: Parser<Char, String> = {
     val result = openTagParser(it)
-    //NOTE: nicer to use when instead of cast
-    val expectedString = (result as Response.Accept).value
-    val readerFromResponse = result.input
-    expectedCloseTagParser(expectedString)(readerFromResponse)
+    when (result) {
+        is Response.Accept -> expectedCloseTagParser(result.value)(result.input)
+        is Response.Reject -> result
+    }
 }
 
 fun main() {

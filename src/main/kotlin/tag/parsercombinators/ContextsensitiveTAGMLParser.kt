@@ -28,20 +28,40 @@ val anyCloseTagParser: Parser<Char, String> = char('<') thenRight charIn(CharRan
 
 val openAndCloseTagParser: Parser<Char, Pair<String, String>> = openTagParser then anyCloseTagParser
 
+/*
+ Attempt to create a parser derivative approach
+ */
+
 typealias DerivativeParser<I, P> = (reader: Reader<I>, pattern: P) -> P
 
+
+
+// TODO: check for end of file or IO error
+// TODO: check whether the first character is the same
+// then we return rest of the string
+// there is a first command and a drop command
+// this might not be the most efficient
+// but for now we continue working with this to get started
+
+//val stringDerivativeParser: DerivativeParser<Char, String> = { reader, pattern ->
+//    val p = reader.read()
+//    val charThatIsRead = p?.first
+//    println(charThatIsRead)
+//    val new_pattern = pattern.drop(1)
+//    new_pattern
+//}
+
+// In case of Accept I just return an empty string
+// In case Of Reject; we are not able to express that yet; we need a better data structure
 val stringDerivativeParser: DerivativeParser<Char, String> = { reader, pattern ->
-    val p = reader.read()
-    val charThatIsRead = p?.first
-    println(charThatIsRead)
-    // TODO: check whether the first character is the same
-    // then we return rest of the string
-    // there is a first command and a drop command
-    // this might not be the most efficient
-    // but for now we continue working with this to get started
-    val new_pattern = pattern.drop(1)
-    new_pattern
+    val delegateFunction = string(pattern)
+    when (delegateFunction(reader)) {
+        is Response.Accept -> ""
+        is Response.Reject -> "String is wrong!"
+    }
 }
+
+
 
 fun main() {
 // the following tests the pattern matchers for tagml open and close tags. There is not yet any context sensitive logic in there.
@@ -65,6 +85,20 @@ fun main() {
     println(dp)
 }
 
+
+
+// Implementation requirements
+// now we need to do repeat
+// a repeat is it has to do once and then optionally multiple times after that
+// we need to check for a character in a certain group
+// optional first...
+// optional is to check whether something occurs if not... that is ok.. move on..
+// if it does not have a next parser... we just end...
+// we need to set back the position..
+// Can't we just wrap an existing parser...
+// Maybe... the then or "and" must be different...
+// the or could maybe work
+// we don't want parser to call other parsers...
 
 /*
  * A need to have a parser with expectations.

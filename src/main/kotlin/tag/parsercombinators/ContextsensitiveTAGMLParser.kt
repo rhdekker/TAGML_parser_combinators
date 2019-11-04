@@ -61,6 +61,14 @@ val stringDerivativeParser: DerivativeParser<Char, String> = { reader, pattern -
     }
 }
 
+// NOTE: Empty character literal does not work?
+val charDerivativeParser: DerivativeParser<Char, Char> = { reader, pattern ->
+    val delegateFunction = char(pattern)
+    when (delegateFunction(reader)) {
+        is Response.Accept -> '/'
+        is Response.Reject -> pattern
+    }
+}
 
 
 fun main() {
@@ -78,11 +86,19 @@ fun main() {
     // In any other case we should just return the string with the first character removed.
     // if the first char is wrong -> Reject
     // if first char is ok ->
+    // this is for a string
     val a = Reader.string("This is just a string.")
     // in this case we make them exactly the same.
     val expectation = "This is just a string"
     val dp = stringDerivativeParser(a, expectation)
     println(dp)
+    // this is for a char
+    val a2 = Reader.string("Another string")
+    // in this case we expect a single character
+    val expectation2 = 'A'
+    val dp2 = charDerivativeParser(a2, expectation2)
+    println(dp2)
+
 }
 
 

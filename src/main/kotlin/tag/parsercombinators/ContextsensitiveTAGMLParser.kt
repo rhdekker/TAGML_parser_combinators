@@ -31,8 +31,8 @@ val openAndCloseTagParser: Parser<Char, Pair<String, String>> = openTagParser th
 /*
  Attempt to create a parser derivative approach
  */
-
-typealias DerivativeParser<I, P> = (reader: Reader<I>, pattern: P) -> P
+// This is remarkable the DerivativeParser type know looks almost the same as the normal parser type!
+typealias DerivativeParser<I, P> = (reader: Reader<I>) -> P
 
 
 
@@ -53,7 +53,8 @@ typealias DerivativeParser<I, P> = (reader: Reader<I>, pattern: P) -> P
 
 // In case of Accept I just return an empty string
 // In case Of Reject; we are not able to express that yet; we need a better data structure
-val stringDerivativeParser: DerivativeParser<Char, String> = { reader, pattern ->
+// Going to rewrite the thing into a function that takes one parameter and returns a function
+fun stringDerivativeParser(pattern: String): DerivativeParser<Char, String> = { reader ->
     val delegateFunction = string(pattern)
     when (delegateFunction(reader)) {
         is Response.Accept -> ""
@@ -61,14 +62,18 @@ val stringDerivativeParser: DerivativeParser<Char, String> = { reader, pattern -
     }
 }
 
-// NOTE: Empty character literal does not work?
-val charDerivativeParser: DerivativeParser<Char, Char> = { reader, pattern ->
-    val delegateFunction = char(pattern)
-    when (delegateFunction(reader)) {
-        is Response.Accept -> '/'
-        is Response.Reject -> pattern
-    }
-}
+
+
+//// NOTE: Empty character literal does not work? I use / now as a work around...
+//// NOTE: This can be done better by making a more explicit return type
+//val charDerivativeParser: DerivativeParser<Char, Char> = { reader, pattern ->
+//    val delegateFunction = char(pattern)
+//    when (delegateFunction(reader)) {
+//        is Response.Accept -> '/'
+//        is Response.Reject -> pattern
+//    }
+//}
+
 
 
 fun main() {
@@ -90,15 +95,31 @@ fun main() {
     val a = Reader.string("This is just a string.")
     // in this case we make them exactly the same.
     val expectation = "This is just a string"
-    val dp = stringDerivativeParser(a, expectation)
-    println(dp)
-    // this is for a char
-    val a2 = Reader.string("Another string")
-    // in this case we expect a single character
-    val expectation2 = 'A'
-    val dp2 = charDerivativeParser(a2, expectation2)
-    println(dp2)
+    val dp = stringDerivativeParser(expectation)
+    val result = dp(a)
+    println(result)
 
+//    // this is for a char
+//    val a2 = Reader.string("Another string")
+//    // in this case we expect a single character
+//    val expectation2 = 'A'
+//    val dp2 = charDerivativeParser(a2, expectation2)
+//    println(dp2)
+
+    // this is for a then (or an and)
+    // We want to combine two expectations into one
+    val a3 = Reader.string("We have one string, with two expectations")
+    // We create two different expectations. There are just strings...
+    // We combine them with an and operator
+    val exp1 = "We have one string,"
+    val exp2 = " with two expectations"
+    // so we have three derivative parsers (2 strings and 1 then combinator)
+    // TODO: there is something wrong with the parameters here, because we want to first be able to setup the
+    // pipeline
+    // TODO: The problem here is that the reader will reread, stuff
+//    val dp3 = stringDerivativeParser(exp1).then(stringDerivativeParser(exp2))
+//    val result3 = dp3(a3)
+//    println(result3)
 }
 
 

@@ -8,9 +8,6 @@ import lambdada.parsec.parser.*
  * We need the basic open and close tags
  * Note that these are in package scope
  */
-val openTagParser: Parser<Char, String> = char('[') thenRight charIn(CharRange('a', 'z')).rep thenLeft char('>') map {
-    String(it.toCharArray())
-}
 
 fun expectedCloseTagParser(expected: String): Parser<Char, String> = char('<') thenRight string(expected) thenLeft char(']')
 

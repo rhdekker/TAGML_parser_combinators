@@ -9,17 +9,25 @@ import java.net.URL
 // We have a number of tagml markup parsers
 // such as open tag, close tag....
 // this parser returns a string but what we really want is to get back a MCT node.
-val openTagParser: Parser<Char, String> = char('[') thenRight charIn(CharRange('a', 'z')).rep thenLeft char('>') map {
-    String(it.toCharArray())
+val openTagNodeParser: Parser<Char, Markup> =
+    char('[') thenRight charIn(CharRange('a', 'z')).rep thenLeft char('|') map {
+    Markup(String(it.toCharArray()), listOf())
 }
 
+/*
+ * First we need data classes for all parts of the MCT
+ *
+ */
+sealed class Node
+data class Markup(val label: String, val colors: List<String>, val id: Long = System.currentTimeMillis()) : Node()
+data class Text(val content: String, val id: Long = System.currentTimeMillis()) : Node()
 
 fun main() {
     val x = File(".")
     println(x.absolutePath)
 
     val a = Reader.url(URL("file:src/main/kotlin/tag/parsercombinators/brulez_no_annotations.tagml"))
-    val r = openTagParser(a)
+    val r = openTagNodeParser(a)
     println(r)
 
 

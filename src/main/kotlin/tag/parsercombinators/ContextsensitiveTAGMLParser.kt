@@ -11,6 +11,11 @@ import lambdada.parsec.parser.*
 
 fun expectedCloseTagParser(expected: String): Parser<Char, String> = char('<') thenRight string(expected) thenLeft char(']')
 
+val openTagParser: Parser<Char, String> =
+    char('[') thenRight charIn(CharRange('a', 'z')).rep thenLeft char('|') map {
+        String(it.toCharArray())
+    }
+
 val anyOpenTagFollowedByTheExactSameCloseTagParser: Parser<Char, String> = {
     when (val result = openTagParser(it)) {
         is Response.Accept -> expectedCloseTagParser(result.value)(result.input)
